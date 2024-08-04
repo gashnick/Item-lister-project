@@ -79,11 +79,10 @@ var form = document.getElementById("addForm");
 var itemList = document.getElementById("items");
 var filter = document.getElementById("filter");
 
+// Load items from local storage
+document.addEventListener("DOMContentLoaded", loadItems);
 // Form submit event
-
 form.addEventListener("submit", addItem);
-// delet event
-itemList.addEventListener("click", removeItem);
 // filter event
 
 filter.addEventListener("keyup", filterItems);
@@ -109,6 +108,10 @@ function addItem(e) {
     // add text node with input
     li.appendChild(document.createTextNode(newItem));
 
+    // Store item in local storage
+    let items = JSON.parse(localStorage.getItem("items")) || [];
+    items.push(newItem);
+    localStorage.setItem("items", JSON.stringify(items));
     //create delete button element
     var deleteBtn = document.createElement("button");
     //add class
@@ -122,13 +125,46 @@ function addItem(e) {
   }
 }
 
-// remove item
+function loadItems() {
+  let items = JSON.parse(localStorage.getItem("items")) || [];
 
+  items.forEach(function (item) {
+    // Create new li element
+    var li = document.createElement("li");
+    // Add class
+    li.className = "list-group-item";
+
+    // Add text node with input
+    li.appendChild(document.createTextNode(item));
+
+    // Create delete button element
+    var deleteBtn = document.createElement("button");
+    // Add class
+    deleteBtn.className = "btn btn-danger btn-sm float-right delete";
+    // Append text node
+    deleteBtn.appendChild(document.createTextNode("X"));
+    // Append button to li
+    li.appendChild(deleteBtn);
+    // Append li to a list
+    itemList.appendChild(li);
+  });
+}
+
+// delet event
+itemList.addEventListener("click", removeItem);
+// remove item
 function removeItem(e) {
   if (e.target.classList.contains("delete")) {
     if (confirm("Are You Sure")) {
       var li = e.target.parentElement;
       itemList.removeChild(li);
+
+      // Remove from local storage
+      let items = JSON.parse(localStorage.getItem("items"));
+      items = items.filter(function (item) {
+        return item !== li.firstChild.textContent;
+      });
+      localStorage.setItem("items", JSON.stringify(items));
     }
   }
 }
